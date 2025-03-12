@@ -1,8 +1,10 @@
 package com.restapi.restapi;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
+@AllArgsConstructor
 public class TicketRequest {
     private String passengerName;
     private String travelDate;

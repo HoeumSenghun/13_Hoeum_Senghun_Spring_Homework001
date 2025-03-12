@@ -20,42 +20,48 @@ public class TicketController {
     }
     // Get All Data
     @GetMapping("/")
-    public ArrayList<Ticket> getTickets() {
-        return tickets;
+    public ResponseEntity<ApiResponse<List<Ticket>>> getTickets() {
+        ApiResponse<List<Ticket>> response = new ApiResponse<>(true, "Tickets retrieved successfully", HttpStatus.OK, tickets, LocalDateTime.now());
+        return ResponseEntity.ok(response);
     }
     // Insert Data
     @PostMapping("/")
-    public Ticket addTicket(@RequestBody Ticket ticket) {
+    public ResponseEntity<ApiResponse<Ticket>> addTicket(@RequestBody Ticket ticket) {
         tickets.add(ticket);
-        return ticket;
+        ApiResponse<Ticket> response = new ApiResponse<>(true, "Ticket added successfully", HttpStatus.CREATED, ticket, LocalDateTime.now());
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
     // Get By ID
     @GetMapping("/{ticket-id}")
-    public Ticket getTicketById(@PathVariable("ticket-id") Integer ticketId) {
+    public ResponseEntity<ApiResponse<Ticket>> getTicketById(@PathVariable("ticket-id") Integer ticketId) {
         for (Ticket ticket : tickets) {
             if (ticket.getTicketId() == ticketId) {
-                return ticket;
+                ApiResponse<Ticket> response = new ApiResponse<>(true, "Ticket found", HttpStatus.OK, ticket, LocalDateTime.now());
+                return ResponseEntity.ok(response);
             }
         }
-        return null;
+        ApiResponse<Ticket> errorResponse = new ApiResponse<>(false, "Ticket not found", HttpStatus.NOT_FOUND, null, LocalDateTime.now());
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
     // Update By ID
     @PutMapping("/{ticket-id}")
-    public Ticket updateTicketById(@PathVariable("ticket-id") Integer ticketId, @RequestBody TicketRequest ticketRequest) {
-        for (Ticket ticket1 : tickets) {
-            if (ticket1.getTicketId() == ticketId){
-                ticket1.setPassengerName(ticketRequest.getPassengerName());
-                ticket1.setTravelDate(ticketRequest.getTravelDate());
-                ticket1.setSourceStation(ticketRequest.getSourceStation());
-                ticket1.setDestinationStation(ticketRequest.getDestinationStation());
-                ticket1.setPrice(ticketRequest.getPrice());
-                ticket1.setPaymentStatus(ticketRequest.isPaymentStatus());
-                ticket1.setTicketStatus(ticketRequest.getTicketStatus());
-                ticket1.setSeatNumber(ticketRequest.getSeatNumber());
-                return ticket1;
+    public ResponseEntity<ApiResponse<Ticket>> updateTicketById(@PathVariable("ticket-id") Integer ticketId, @RequestBody TicketRequest ticketRequest) {
+        for (Ticket ticket : tickets) {
+            if (ticket.getTicketId() == ticketId) {
+                ticket.setPassengerName(ticketRequest.getPassengerName());
+                ticket.setTravelDate(ticketRequest.getTravelDate());
+                ticket.setSourceStation(ticketRequest.getSourceStation());
+                ticket.setDestinationStation(ticketRequest.getDestinationStation());
+                ticket.setPrice(ticketRequest.getPrice());
+                ticket.setPaymentStatus(ticketRequest.isPaymentStatus());
+                ticket.setTicketStatus(ticketRequest.getTicketStatus());
+                ticket.setSeatNumber(ticketRequest.getSeatNumber());
+                ApiResponse<Ticket> response = new ApiResponse<>(true, "Ticket updated successfully", HttpStatus.OK, ticket, LocalDateTime.now());
+                return ResponseEntity.ok(response);
             }
         }
-        return null;
+        ApiResponse<Ticket> errorResponse = new ApiResponse<>(false, "Ticket not found", HttpStatus.NOT_FOUND, null, LocalDateTime.now());
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
     // Delete By ID
     @DeleteMapping("/{ticket-id}")
@@ -63,32 +69,43 @@ public class TicketController {
         for (Ticket ticket : tickets) {
             if (ticket.getTicketId() == ticketId) {
                 tickets.remove(ticket);
-                ApiResponse<Ticket> response=new ApiResponse<>(true,"success", HttpStatus.OK,null, LocalDateTime.now());
+                ApiResponse<Ticket> response = new ApiResponse<>(true, "Ticket deleted successfully", HttpStatus.OK, null, LocalDateTime.now());
                 return ResponseEntity.ok(response);
             }
         }
-        return null;
+        ApiResponse<Ticket> errorResponse = new ApiResponse<>(false, "Ticket not found", HttpStatus.NOT_FOUND, null, LocalDateTime.now());
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
     // Search By Name
     @GetMapping("/search")
-    public List<Ticket> searchTicketByName(@RequestParam String passengerName) {
+    public ResponseEntity<ApiResponse<List<Ticket>>> searchTicketByName(@RequestParam String passengerName) {
         List<Ticket> ticketList = new ArrayList<>();
         for (Ticket ticket : tickets) {
             if (ticket.getPassengerName().toLowerCase().contains(passengerName.toLowerCase())) {
                 ticketList.add(ticket);
             }
         }
-        return ticketList;
+        if (ticketList.isEmpty()) {
+            ApiResponse<List<Ticket>> errorResponse = new ApiResponse<>(false, "No tickets found", HttpStatus.NOT_FOUND, null, LocalDateTime.now());
+            return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+        }
+        ApiResponse<List<Ticket>> response = new ApiResponse<>(true, "Tickets found", HttpStatus.OK, ticketList, LocalDateTime.now());
+        return ResponseEntity.ok(response);
     }
     // Filter By ticketStatus and travelDate
     @GetMapping("/filter")
-    public List<Ticket> filterTicket(@RequestParam Status ticketStatus, @RequestParam String travelDate) {
+    public ResponseEntity<ApiResponse<List<Ticket>>> filterTicket(@RequestParam Status ticketStatus, @RequestParam String travelDate) {
         List<Ticket> ticketList = new ArrayList<>();
         for (Ticket ticket : tickets) {
             if (ticket.getTicketStatus() == ticketStatus && ticket.getTravelDate().equals(travelDate)) {
                 ticketList.add(ticket);
             }
         }
-        return ticketList;
+        if (ticketList.isEmpty()) {
+            ApiResponse<List<Ticket>> errorResponse = new ApiResponse<>(false, "No matching tickets found", HttpStatus.NOT_FOUND, null, LocalDateTime.now());
+            return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+        }
+        ApiResponse<List<Ticket>> response = new ApiResponse<>(true, "Tickets filtered successfully", HttpStatus.OK, ticketList, LocalDateTime.now());
+        return ResponseEntity.ok(response);
     }
 }

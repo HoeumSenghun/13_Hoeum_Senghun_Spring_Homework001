@@ -57,7 +57,18 @@ public class TicketController {
         }
         return null;
     }
-
+    // Delete By ID
+    @DeleteMapping("/{ticket-id}")
+    public ResponseEntity<ApiResponse<Ticket>> deleteTicket(@PathVariable("ticket-id") Integer ticketId) {
+        for (Ticket ticket : tickets) {
+            if (ticket.getTicketId() == ticketId) {
+                tickets.remove(ticket);
+                ApiResponse<Ticket> response=new ApiResponse<>(true,"success", HttpStatus.OK,null, LocalDateTime.now());
+                return ResponseEntity.ok(response);
+            }
+        }
+        return null;
+    }
     // Search By Name
     @GetMapping("/search")
     public List<Ticket> searchTicketByName(@RequestParam String passengerName) {

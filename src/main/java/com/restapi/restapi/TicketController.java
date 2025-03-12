@@ -31,6 +31,13 @@ public class TicketController {
         ApiResponse<Ticket> response = new ApiResponse<>(true, "Ticket added successfully", HttpStatus.CREATED, ticket, LocalDateTime.now());
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
+    // Insert Multiple Data
+    @PostMapping("/bulk")
+    public ResponseEntity<ApiResponse<List<Ticket>>> addMultipleTickets(@RequestBody List<Ticket> newTickets) {
+        tickets.addAll(newTickets);
+        ApiResponse<List<Ticket>> response = new ApiResponse<>(true, "Tickets added successfully", HttpStatus.CREATED, newTickets, LocalDateTime.now());
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
     // Get By ID
     @GetMapping("/{ticket-id}")
     public ResponseEntity<ApiResponse<Ticket>> getTicketById(@PathVariable("ticket-id") Integer ticketId) {
@@ -62,6 +69,23 @@ public class TicketController {
         }
         ApiResponse<Ticket> errorResponse = new ApiResponse<>(false, "Ticket not found", HttpStatus.NOT_FOUND, null, LocalDateTime.now());
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
+    // Update Multiple Data
+    @PutMapping("/bulk")
+    public ResponseEntity<ApiResponse<List<Ticket>>> updatePaymentStatus(@RequestBody PaymentStatusRequest request) {
+        List<Ticket> updatedTickets = new ArrayList<>();
+        for (Integer ticketId : request.getTicketIds()) {
+            for (Ticket ticket : tickets) {
+                if (ticket.getTicketId() == ticketId) {
+                    ticket.setPaymentStatus(request.isPaymentStatus());
+                    updatedTickets.add(ticket);
+                }
+            }
+        }
+        if (updatedTickets.isEmpty()) {
+            return new ResponseEntity<>(new ApiResponse<>(false, "No tickets updated", HttpStatus.NOT_FOUND, null, LocalDateTime.now()), HttpStatus.NOT_FOUND);
+        }
+        return ResponseEntity.ok(new ApiResponse<>(true, "Payment status updated successfully", HttpStatus.OK, updatedTickets, LocalDateTime.now()));
     }
     // Delete By ID
     @DeleteMapping("/{ticket-id}")

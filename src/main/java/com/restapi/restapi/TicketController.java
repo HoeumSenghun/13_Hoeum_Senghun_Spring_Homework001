@@ -20,9 +20,14 @@ public class TicketController {
     }
     // Get All Data
     @GetMapping("/")
-    public ResponseEntity<ApiResponse<List<Ticket>>> getTickets() {
-        ApiResponse<List<Ticket>> response = new ApiResponse<>(true, "Tickets retrieved successfully", HttpStatus.OK, tickets, LocalDateTime.now());
-        return ResponseEntity.ok(response);
+    public ResponseEntity<ApiResponse<List<Ticket>>> getTickets(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+        int start = (page-1) * size;
+        int end = Math.min(start + size, tickets.size());
+        if (start >= tickets.size()) {
+            return new ResponseEntity<>(new ApiResponse<>(false, "No tickets found", HttpStatus.NOT_FOUND, null, LocalDateTime.now()), HttpStatus.NOT_FOUND);
+        }
+        List<Ticket> paginatedTickets = tickets.subList(start, end);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Tickets retrieved successfully", HttpStatus.OK, paginatedTickets, LocalDateTime.now()));
     }
     // Insert Data
     @PostMapping("/")
